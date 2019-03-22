@@ -34,6 +34,7 @@ RUN apt-get -y --force-yes install \
     php-mongodb \
     php-redis \
     php7.2-apcu \
+    php7.2-sybase \
     unattended-upgrades \
     git \
     build-essential \
