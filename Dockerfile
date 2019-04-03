@@ -14,6 +14,7 @@ RUN apt-get -y update \
     && add-apt-repository -y ppa:ondrej/php \
     && apt-get -y update
 RUN apt-get -y --force-yes install \
+    supervisor \
     php7.2 \
     php7.2-fpm \
     php7.2-cli \
@@ -67,6 +68,8 @@ COPY /resources/php.ini /etc/php/7.2/mods-available/custom.ini
 RUN phpenmod custom
 
 RUN cat /resources/www.conf >> /etc/php/7.2/fpm/pool.d/www.conf
+
+COPY /resources/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN curl -sS https://getcomposer.org/installer | php \
     && chmod +x composer.phar \
