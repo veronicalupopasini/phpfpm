@@ -39,10 +39,14 @@ RUN apt-get -y update \
     git \
     build-essential
 
+WORKDIR /resources
+
 COPY /resources/php.ini /etc/php/7.3/mods-available/custom.ini
 RUN phpenmod custom
 
 RUN cat /resources/www.conf >> /etc/php/7.3/fpm/pool.d/www.conf
+
+COPY /resources/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN curl -sS https://getcomposer.org/installer | php \
     && chmod +x composer.phar \
