@@ -14,6 +14,7 @@ RUN apt-get -y update \
     && add-apt-repository -y ppa:ondrej/php \
     && apt-get -y update \
     && apt-get -y --force-yes install \
+    supervisor \
     php7.3 \
     php7.3-fpm \
     php7.3-cli \
