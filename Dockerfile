@@ -1,76 +1,41 @@
-FROM ubuntu:bionic
+FROM php:7.3-fpm
 
-ENV TERM xterm
 ENV MAX_UPLOAD_SIZE 50M
-ENV DEBIAN_FRONTEND noninteractive
+ENV ENABLE_XDEBUG 0
 
-# Provision
+WORKDIR /
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends vim nano curl debconf git apt-transport-https apt-utils \
+    build-essential locales acl mailutils wget zip unzip \
+    gnupg gnupg1 gnupg2 \
+    supervisor libpq-dev libpng-dev libssl-dev libcurl4-openssl-dev pkg-config libzip-dev libedit-dev zlib1g-dev libicu-dev g++ libxml2-dev \
+    ksh \
+    && docker-php-ext-install opcache pdo_pgsql gd zip intl xmlrpc \
+    && pecl install redis-5.1.1 \
+    && pecl install igbinary \
+    && pecl install xdebug-2.9.0 \
+    && pecl install apcu \
+    && docker-php-ext-enable redis igbinary xdebug apcu
 
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 ADD /resources/* /resources/
 WORKDIR /resources
-
-RUN apt-get -y update \
-    && apt-get -y install curl wget software-properties-common \
-    && add-apt-repository -y ppa:ondrej/php \
-    && apt-get -y update \
-    && apt-get -y --force-yes install \
-    supervisor \
-    php7.3 \
-    php7.3-fpm \
-    php7.3-cli \
-    php7.3-pgsql \
-    php7.3-gd \
-    php7.3-curl \
-    php7.3-zip \
-    php7.3-mbstring \
-    php7.3-xdebug \
-    php7.3-readline \
-    php7.3-sqlite3 \
-    php7.3-common \
-    php7.3-intl \
-    php7.3-xmlrpc \
-    php7.3-xml \
-    php7.3-dev \
-    php-pear \
-    php-mongodb \
-    php-redis \
-    php7.3-apcu \
-    php7.3-sybase \
-    unattended-upgrades \
-    git \
-    build-essential
-
-WORKDIR /resources
-
-COPY /resources/php.ini /etc/php/7.3/mods-available/custom.ini
-RUN phpenmod custom
-
-RUN cat /resources/www.conf >> /etc/php/7.3/fpm/pool.d/www.conf
-
+COPY /resources/php.ini $PHP_INI_DIR/conf.d/
+RUN cat /resources/www.conf >> /usr/local/etc/php-fpm.d/www.conf
 COPY /resources/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-RUN curl -sS https://getcomposer.org/installer | php \
-    && chmod +x composer.phar \
-    && mv composer.phar /usr/bin/composer
+RUN curl -sSk https://getcomposer.org/installer | php -- --disable-tls && \
+   mv composer.phar /usr/local/bin/composer
 
-RUN chmod u+x /resources/entrypoint.sh
-
-RUN mkdir /run/php
-ENV BOOTSTRAP_SCRIPT ""
-
-# Security Updates
-
-RUN unattended-upgrades -d
-
-# Copy Application Sources
+RUN rm -rf /var/lib/apt/lists/*
+RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+    echo "it_IT.UTF-8 UTF-8" >> /etc/locale.gen && \
+    locale-gen
 
 RUN mkdir /app
 WORKDIR /app
 
 VOLUME ["/app"]
 
-# Default Command and Expose ports
-
-CMD ["bash", "/resources/entrypoint.sh"]
-
 EXPOSE 9000
+CMD ["bash", "/resources/entrypoint.sh"]
