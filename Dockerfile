@@ -22,6 +22,7 @@ ADD /resources/* /resources/
 WORKDIR /resources
 COPY /resources/php.ini $PHP_INI_DIR/conf.d/
 RUN cat /resources/www.conf >> /usr/local/etc/php-fpm.d/www.conf
+COPY /resources/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN mkdir /opt/ibm
 COPY /resources/v11.1.4fp4a_linuxx64_dsdriver.tar.gz /opt/ibm
