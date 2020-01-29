@@ -55,6 +55,9 @@ RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
 RUN mkdir /app
 WORKDIR /app
 
+RUN useradd -m -r -u 1000 -g www-data -g root appuser
+USER appuser
+
 VOLUME ["/app"]
 
 EXPOSE 9000
