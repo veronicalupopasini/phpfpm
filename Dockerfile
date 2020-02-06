@@ -35,7 +35,8 @@ RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
 RUN mkdir /app
 WORKDIR /app
 
-RUN useradd -m -r -u 1000 -g www-data -g sudo appuser
+RUN chmod g+w /usr/local/etc/php/conf.d
+RUN useradd -m -r -u 1000 -g www-data -g sudo -g root appuser
 USER appuser
 
 VOLUME ["/app"]
